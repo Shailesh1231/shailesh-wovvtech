@@ -31,10 +31,10 @@ export default class DashboardScreen extends React.PureComponent {
             url
         );
         api.then((response) => response.json().then(json => ({ json, response })))
-            .then((json, response) => {
+            .then((json) => {
                 this.setState({ asteroidName: json.json.name, asteroidUrl: json.json.nasa_jpl_url, isHazardous: json.json.is_potentially_hazardous_asteroid });
             })
-            .then(response => { console.log(response) }, error => { alert("Invalid asteroid id") });
+            .then(response => { console.log(response) }, error => { console.log(error); alert("Invalid asteroid id") });
     }
 
     login() {
