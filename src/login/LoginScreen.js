@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet, Text, Button, ScrollView, TextInput, Alert } from 'react-native';
-import { Container, Content, Form } from 'native-base';
 
 import * as Constants from '../constants'
 
@@ -10,67 +9,40 @@ export default class LoginScreen extends React.PureComponent {
         super(props);
         this.state = {
             isLoading: false,
-            userID: '',
-            password: '',
             asteroidId: ''
         };
     }
-    payloadData = {};
-
-
-    componentDidMount() {
-        debugger
-
-        // this.callAPI('company');
-    }
-
 
     callAPI(action) {
         let url;
-        debugger
         if (action == 'login') {
             url = Constants.BASE_URL + this.state.asteroidId + '?api_key=' + Constants.API_KEY;
-
         } else if (action == 'random') {
-            url = Constants.BASE_URL + 'browse?api_key=' + Constants.API_KEY;
+            url = Constants.BASE_URL + 'browse?api_key=DEMO_KEY';
         }
-
         const api = fetch(
             url
         );
-        api.then((response) => response.json())
-            .then((json) => {
+        api.then((response) => response.json().then(json => ({ json, response })))
+            .then((json, response) => {
                 if (action == 'login') {
-                    debugger
-                    data = {
-                        name: json.name,
-                        nasa_jpl_url: json.nasa_jpl_url,
-                        is_potentially_hazardous_asteroid: json.is_potentially_hazardous_asteroid
-                    };
-                    this.props.navigation.navigate('DashboardScreen', { known: json })
+                    this.props.navigation.navigate('DashboardScreen', { key: 'known', data: json.json })
                 } else if (action == 'random') {
-                    
+                    this.props.navigation.navigate('DashboardScreen', { key: 'random', data: json.json });
                 }
-                // this.setState({ data: json.movies });
-
+                this.setState({ asteroidId: '' });
             })
-            .catch((error) => console.error(error))
-            .finally(() => {
-                this.setState({ isLoading: false });
-            });
-
+            .then(response => { console.log(response) }, error => { alert("Invalid asteroid id") });
     }
-
     login() {
         this.callAPI('login');
     }
-
     render() {
         return (
-            <Container style={styles.container}>
-                <Content contentContainerStyle={styles.content}>
-                    <Form style={{ width: '90%' }}>
-                        <ScrollView >
+            <View style={styles.container}>
+                <View style={styles.content}>
+                    <View style={{ width: '90%' }}>
+                        <ScrollView>
                             <TextInput
                                 style={{
                                     height: 40, borderBottomColor: '#000000',
@@ -82,7 +54,6 @@ export default class LoginScreen extends React.PureComponent {
                             />
                             <Button
                                 title="Submit"
-                                // onPress={() => navigation.navigate('Profile', { name: 'Jane' })}
                                 onPress={() => this.login()}
                                 disabled={!this.state.asteroidId ? true : false}
                             />
@@ -90,14 +61,12 @@ export default class LoginScreen extends React.PureComponent {
                                 <Button
                                     title="Random Asteroid"
                                     onPress={() => this.callAPI('random')}
-
                                 />
                             </View>
                         </ScrollView>
-                    </Form>
-                </Content>
-
-            </Container>
+                    </View>
+                </View>
+            </View>
         );
     }
 }
@@ -111,14 +80,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    button: {
-        width: 208,
-        height: 40,
-        borderRadius: 2,
-        justifyContent: 'center',
-        alignSelf: 'center',
-        marginTop: 24
-    },
+    }
 
 });

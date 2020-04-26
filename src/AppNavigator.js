@@ -11,14 +11,14 @@ const Stack = createStackNavigator();
 export default function AppNavigator() {
     return (
         <NavigationContainer>
-            <Stack.Navigator initialRouteName="DashboardScreen">
+            <Stack.Navigator initialRouteName="LoginScreen">
                 <Stack.Screen
                     name="Login"
                     component={LoginScreen}
                     options={{ title: 'Login' }}
                 />
                 <Stack.Screen
-                    name="Dashboard"
+                    name="DashboardScreen"
                     component={DashboardScreen}
                     options={{ title: 'Asteriod' }}
                 />
