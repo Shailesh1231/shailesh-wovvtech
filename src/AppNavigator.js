@@ -15,12 +15,12 @@ export default function AppNavigator() {
                 <Stack.Screen
                     name="Login"
                     component={LoginScreen}
-                    options={{ title: 'Login' }}
+                    options={{ title: 'Assignment' }}
                 />
                 <Stack.Screen
                     name="DashboardScreen"
                     component={DashboardScreen}
-                    options={{ title: 'Asteriod' }}
+                    options={{ title: 'Weather Report' }}
                 />
             </Stack.Navigator>
         </NavigationContainer>

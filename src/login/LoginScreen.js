@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, Text, Button, ScrollView, TextInput, Alert } from 'react-native';
+import { View, StyleSheet, Text, Button, TextInput, Alert, Image } from 'react-native';
+import SvgUri from 'react-native-svg-uri';
+
 
 import * as Constants from '../constants'
 
@@ -9,7 +11,9 @@ export default class LoginScreen extends React.PureComponent {
         super(props);
         this.state = {
             isLoading: false,
-            asteroidId: ''
+            asteroidId: '',
+            countryName: '',
+            isDataEmpty: false
         };
     }
 
@@ -19,53 +23,90 @@ export default class LoginScreen extends React.PureComponent {
             url = Constants.BASE_URL + this.state.asteroidId + '?api_key=' + Constants.API_KEY;
         } else if (action == 'random') {
             url = Constants.BASE_URL + 'browse?api_key=DEMO_KEY';
+        } else if (action == 'country') {
+            url = Constants.BASE_URL_COUNTRY + this.state.countryName;
         }
         const api = fetch(
             url
         );
         api.then((response) => response.json().then(json => ({ json, response })))
-            .then((json, response) => {
+            .then((json) => {
+                debugger
                 if (action == 'login') {
                     this.props.navigation.navigate('DashboardScreen', { key: 'known', data: json.json })
                 } else if (action == 'random') {
                     this.props.navigation.navigate('DashboardScreen', { key: 'random', data: json.json });
+                } else if (action == 'country') {
+                    let countryData = json.json.filter((el) => {
+                        return el.name.toLowerCase() == this.state.countryName.toLowerCase()
+                    })
+                    countryData.length > 0 ?
+                        this.props.navigation.navigate('DashboardScreen', { key: 'country', data: countryData[0] })
+                        :
+                        this.setState({ isDataEmpty: true })
                 }
-                this.setState({ asteroidId: '' });
+
+                this.setState({ asteroidId: '', countryName: '' });
             })
-            .then(response => { console.log(response) }, error => { alert("Invalid asteroid id") });
+            .then(response => { console.log(response) }, error => { console.log(error); alert("server error") });
     }
     login() {
         this.callAPI('login');
     }
+
+    getCountryData() {
+        this.callAPI('country')
+    }
+
     render() {
         return (
             <View style={styles.container}>
                 <View style={styles.content}>
-                    <View style={{ width: '90%' }}>
-                        <ScrollView>
-                            <TextInput
-                                style={{
-                                    height: 40, borderBottomColor: '#000000',
-                                    borderBottomWidth: 1, marginBottom: 20
-                                }}
-                                placeholder={"Enter Asteroid ID"}
-                                onChangeText={text => this.setState({ asteroidId: text })}
-                                value={this.state.asteroidId}
-                            />
+                    {/* <View style={{ width: '90%' }}>
+                        <TextInput
+                            style={{
+                                height: 40, borderBottomColor: '#000000',
+                                borderBottomWidth: 1, marginBottom: 20
+                            }}
+                            placeholder={"Enter Asteroid ID"}
+                            onChangeText={text => this.setState({ asteroidId: text })}
+                            value={this.state.asteroidId}
+                        />
+                        <Button
+                            title="Submit"
+                            onPress={() => this.login()}
+                            disabled={!this.state.asteroidId.length ? true : false}
+                        />
+                        <View style={{ paddingTop: 20 }}>
                             <Button
-                                title="Submit"
-                                onPress={() => this.login()}
-                                disabled={!this.state.asteroidId ? true : false}
+                                title="Random Asteroid"
+                                onPress={() => this.callAPI('random')}
                             />
-                            <View style={{ paddingTop: 20 }}>
-                                <Button
-                                    title="Random Asteroid"
-                                    onPress={() => this.callAPI('random')}
-                                />
-                            </View>
-                        </ScrollView>
+                        </View>
+                    </View> */}
+                    <View style={{ width: '90%' }}>
+                        <TextInput
+                            style={{
+                                height: 40, borderBottomColor: '#000000',
+                                borderBottomWidth: 1, marginBottom: 20
+                            }}
+                            placeholder={"Enter country name"}
+                            onChangeText={text => this.setState({ countryName: text })}
+                            value={this.state.countryName}
+                        />
+                        <Button
+                            title="Submit"
+                            onPress={() => this.getCountryData()}
+                            disabled={!(this.state.countryName.length > 2) ? true : false}
+                        />
+
                     </View>
+
                 </View>
+                {this.state.isDataEmpty &&
+                    <View style={{ flex: 0.5, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 20 }}>No Record Found</Text>
+                    </View>}
             </View>
         );
     }
